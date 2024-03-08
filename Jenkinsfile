@@ -1,50 +1,41 @@
 pipeline {
-    agent any
-
+    agent any 
     stages {
         stage('Build') {
             steps {
-                script {
-                    // Compile the C++ file
-                    sh 'g++ -o my_program pes2ug21cs419-1.cpp'
-                }
+                // It seems like you want to build a project called 'PES2UG21CS006-1'. 
+                // If it's a Jenkins job, use 'build' step to trigger it.
+                build 'PES2UG21CS419-1'
+                
+                // Assuming 'main.cpp' is part of the project being built, 
+                // ensure that the build job generates the 'main.cpp' file or it's available in the workspace.
+                
+                // If 'main.cpp' is a part of the current workspace, you can directly compile it.
+                sh 'g++ main.cpp -o output'
             }
         }
+
         stage('Test') {
-            steps {
-                script {
-                    // Print the output of the compiled program
-                    sh './my_program'
+            steps { 
+                // Assuming 'output' is the compiled executable.
+                // You should navigate to the directory where the executable is located before executing it.
+                dir ('.') {
+                    sh './output'
                 }
             }
         }
-        stage('Deploy') {
-            steps {
-                script {
-                    // Push the changes to the repository
-                    gitPush()
-                }
-            }
-        }
-    }
 
-    post {
-        failure {
-            echo 'pipeline failed'
-        }
-    }
-}
+        stage('Deploy') { 
+            steps { 
+                echo 'Deployed' 
+            } 
+        } 
 
-def gitPush() {
-    // Replace these values with your Git repository URL and credentials
-    def gitUrl = 'https://github.com/your_username/your_repository.git'
-    def gitCredentialsId = 'your_git_credentials_id'
+    } 
 
-    withCredentials([usernamePassword(credentialsId: gitCredentialsId, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-        sh "git config --global user.email 'you@example.com'"
-        sh "git config --global user.name 'Jenkins'"
-        sh "git add ."
-        sh "git commit -m 'Update C++ file'"
-        sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${gitUrl}"
-    }
+    post { 
+        failure { 
+            error 'Pipeline failed' 
+        }  
+    }  
 }
